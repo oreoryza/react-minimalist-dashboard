@@ -45,8 +45,7 @@ const Blog = () => {
 
   const handleEditorChange = (event, editor) => {
     const data = editor.getData();
-    const cleanData = DOMPurify.sanitize(data);
-    setForm({ ...form, content: cleanData });
+    setForm({ ...form, content: data });
   };
 
   const handleSubmit = (e) => {
