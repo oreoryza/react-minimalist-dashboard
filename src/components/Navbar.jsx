@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import logo from "../assets/Logo.svg"
 
-export default function Navbar({ logout, loading, onClick, username, showSidebar }) {
+export default function Navbar({ logout, loading, onClick, showSidebar }) {
   const { profile } = useSelector((state) => state.auth);
   return (
     <nav>

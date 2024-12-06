@@ -42,7 +42,7 @@ export const updateUsers = createAsyncThunk(
 
 // Portfolio
 export const getPortfolios = createAsyncThunk(
-  "portofolios/fetch",
+  "portfolios/fetch",
   async (_, { getState }) => {
     const state = getState();
     const token = state.auth.login.token;
@@ -58,7 +58,7 @@ export const getPortfolios = createAsyncThunk(
 );
 
 export const postPortfolios = createAsyncThunk(
-  "portofolios/post",
+  "portfolios/post",
   async (portfolio, { getState }) => {
     const state = getState();
     const token = state.auth.login.token;
@@ -74,7 +74,7 @@ export const postPortfolios = createAsyncThunk(
 );
 
 export const deletePortfolios = createAsyncThunk(
-  "portofolios/delete",
+  "portfolios/delete",
   async (id, { getState }) => {
     const state = getState();
     const token = state.auth.login.token;
@@ -88,7 +88,7 @@ export const deletePortfolios = createAsyncThunk(
 );
 
 export const updatePortfolio = createAsyncThunk(
-  "portofolios/update",
+  "portfolios/update",
   async ({ id, ...portfolioData }, { getState }) => {
     const state = getState();
     const token = state.auth.login.token;
@@ -104,6 +104,20 @@ export const updatePortfolio = createAsyncThunk(
       }
     );
     return response.data;
+  }
+);
+
+export const detailPortfolio = createAsyncThunk(
+  "portfolios/detail",
+  async (id, { getState }) => {
+    const state = getState();
+    const token = state.auth.login.token;
+    const response = await axios.get(`${API_URL}/portfolio/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data.data;
   }
 );
 
@@ -152,6 +166,20 @@ export const deleteBlogs = createAsyncThunk(
   }
 );
 
+export const detailBlog = createAsyncThunk(
+  "blogs/detail",
+  async (id, { getState }) => {
+    const state = getState();
+    const token = state.auth.login.token;
+    const response = await axios.get(`${API_URL}/blogs/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data.data;
+  }
+);
+
 export const publishBlog = createAsyncThunk(
   "blogs/publish",
   async (id, { getState }) => {
@@ -167,7 +195,7 @@ export const publishBlog = createAsyncThunk(
         },
       }
     );
-    return response.data; // Pastikan ini sesuai dengan struktur data yang dikembalikan
+    return response.data;
   }
 );
 
@@ -333,6 +361,18 @@ const restSlice = createSlice({
         state.loading = false;
         state.error = action.error.message;
       })
+      // detail Portfolio
+      .addCase(detailPortfolio.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(detailPortfolio.fulfilled, (state, action) => {
+        state.loading = false;
+        state.portfolio = action.payload;
+      })
+      .addCase(detailPortfolio.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
+      })
       // Update Portfolio
       .addCase(updatePortfolio.pending, (state) => {
         state.loading = true;
@@ -384,18 +424,48 @@ const restSlice = createSlice({
         state.loading = false;
         state.blogs = state.blogs.filter((blog) => blog.id !== action.payload);
       })
+      // Detail Blog
+      .addCase(detailBlog.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(detailBlog.fulfilled, (state, action) => {
+        state.loading = false;
+        state.blog = action.payload;
+      })
+      .addCase(detailBlog.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
+      })
+      // Update Blog
+      // .addCase(updateBlog.pending, (state) => {
+      //   state.loading = true;
+      // })
+      // .addCase(updateBlog.fulfilled, (state, action) => {
+      //   state.loading = false;
+      //   const updatedBlog = action.payload.data;
+      //   const index = state.blogs.findIndex(
+      //     (blog) => blog.id === updatedBlog.id
+      //   );
+      //   if (index !== -1) {
+      //     state.blogs[index] = updatedBlog;
+      //   }
+      // })
+      // .addCase(updateBlog.rejected, (state, action) => {
+      //   state.loading = false;
+      //   state.error = action.error.message;
+      // })
       // Publish Blog
       .addCase(publishBlog.pending, (state) => {
         state.loading = true;
       })
       .addCase(publishBlog.fulfilled, (state, action) => {
         state.loading = false;
-        const updatedBlog = action.payload.data; // Pastikan ini sesuai dengan struktur data yang dikembalikan
+        const updatedBlog = action.payload.data;
         const index = state.blogs.findIndex(
           (blog) => blog.id === updatedBlog.id
         );
         if (index !== -1) {
-          state.blogs[index] = updatedBlog; // Update the blog in the array
+          state.blogs[index] = updatedBlog;
         }
       })
       .addCase(publishBlog.rejected, (state, action) => {

@@ -5,13 +5,13 @@ import { getUsers, updateUsers } from "../redux/async/restSlice";
 const Profile = () => {
   const dispatch = useDispatch();
   const { profile } = useSelector((state) => state.auth);
-  const { users, totalUsers } = useSelector((state) => state.rest); // Pastikan totalUsers ada di state
+  const { users, totalUsers } = useSelector((state) => state.rest);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const usersPerPage = 7; // Jumlah pengguna per halaman
+  const usersPerPage = 7;
 
   useEffect(() => {
-    dispatch(getUsers({ page: currentPage, limit: usersPerPage })); // Panggil API dengan page dan limit
+    dispatch(getUsers({ page: currentPage, limit: usersPerPage }));
   }, [dispatch, currentPage]);
 
   const handleSearch = (e) => {
@@ -19,7 +19,7 @@ const Profile = () => {
     if (searchTerm.trim() === "") {
       return;
     } else {
-      dispatch(getUsers({ search: searchTerm, page: 1, limit: usersPerPage })); // Reset ke halaman 1 saat mencari
+      dispatch(getUsers({ search: searchTerm, page: 1, limit: usersPerPage }));
       setCurrentPage(1);
     }
   };
@@ -27,19 +27,20 @@ const Profile = () => {
   const handleReset = (e) => {
     e.preventDefault();
     setSearchTerm("");
-    dispatch(getUsers({ page: 1, limit: usersPerPage })); // Reset ke halaman 1
+    dispatch(getUsers({ page: 1, limit: usersPerPage }));
     setCurrentPage(1);
   };
 
   // Hitung jumlah halaman
-  const totalPages = Math.ceil(totalUsers / usersPerPage); // totalUsers harus diambil dari API
+  const totalPages = Math.ceil(totalUsers / usersPerPage);
 
   return (
     <div>
         <div className="w-48 h-48 rounded-full overflow-hidden">
           <img src={profile.photo} alt="" className="h-full w-full object-cover" />
         </div>
-        <h2 className="text-2xl">{profile.name}</h2>
+        <h2 className="text-2xl font-bold">{profile.name}</h2>
+        <p className="text-black">{profile.email}</p>
       <div className="flex justify-end items-center w-full my-6">
         <form
           onSubmit={handleSearch}

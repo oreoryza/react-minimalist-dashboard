@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getPortfolios, postPortfolios, deletePortfolios, updatePortfolio } from "../redux/async/restSlice";
+import { getPortfolios, postPortfolios, deletePortfolios, detailPortfolio, updatePortfolio } from "../redux/async/restSlice";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-
+import DOMPurify from 'dompurify'
 
 const Portfolio = () => {
   const dispatch = useDispatch();
-  const { portfolios } = useSelector((state) => state.rest);
+  const { portfolios, portfolio } = useSelector((state) => state.rest);
 
   const [form, setForm] = useState({
     title: "",
@@ -57,10 +57,11 @@ const Portfolio = () => {
     setForm({ title: "", content: "", banner: null });
   };
 
-  const handleEdit = (portfolio) => {
+  const handleEdit = (id) => {
+    dispatch(detailPortfolio(id));
     setForm({
-      title: portfolio.title,
-      content: portfolio.content,
+      title: portfolio.title || "",
+      content: portfolio.content || "",
       banner: null,
     });
     setCurrentPortfolioId(portfolio.id);

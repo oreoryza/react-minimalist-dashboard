@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getBlogs, postBlogs, deleteBlogs, publishBlog } from "../redux/async/restSlice";
+import { getBlogs, postBlogs, deleteBlogs, detailBlog, publishBlog } from "../redux/async/restSlice";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 const Blog = () => {
   const dispatch = useDispatch();
-  const { blogs } = useSelector((state) => state.rest);
+  const { blogs, blog } = useSelector((state) => state.rest);
+  const [isEdit, setIsEdit] = useState(false);
 
   const [form, setForm] = useState({
     title: "",
@@ -20,6 +21,19 @@ const Blog = () => {
     dispatch(getBlogs());
   }, [dispatch]);
 
+  // Update form state when blog changes
+  useEffect(() => {
+    if (isEdit && blog) {
+      setForm({
+        title: blog.title || "",
+        content: blog.content || "",
+        banner: null,
+        meta_title: blog.meta_title || "",
+        meta_desc: blog.meta_desc || "",
+      });
+    }
+  }, [blog]);
+
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     if (name === "banner") {
@@ -31,7 +45,8 @@ const Blog = () => {
 
   const handleEditorChange = (event, editor) => {
     const data = editor.getData();
-    setForm({ ...form, content: data });
+    const cleanData = DOMPurify.sanitize(data);
+    setForm({ ...form, content: cleanData });
   };
 
   const handleSubmit = (e) => {
@@ -47,6 +62,12 @@ const Blog = () => {
     dispatch(postBlogs(formData));
     setForm({ title: "", content: "", banner: null });
     dispatch(getBlogs());
+    setIsEdit(false);
+  };
+
+  const handleEdit = (blogId) => {
+    setIsEdit(true);
+    dispatch(detailBlog(blogId));
   };
 
   return (
@@ -132,20 +153,20 @@ const Blog = () => {
           </tr>
         </thead>
         <tbody>
-          {blogs.map((blog, index) => (
+          {blogs.map((blogItem, index) => (
             <tr
-              key={blog.id}
+              key={blogItem.id}
               className="border-y border-black hover:bg-black/[.1]"
             >
                 <td>{index+1}</td>
-              <td className="py-4">{blog.title}</td>
+              <td className="py-4">{blogItem.title}</td>
               <td className="text-center">
-                <input type="checkbox" checked={blog.published} disabled />
+                <input type="checkbox" checked={blogItem.published} disabled />
               </td>
               <td className="text-center">
-              <button onClick={() => dispatch(publishBlog(blog.id))} className="text-green">Publish</button>
-                <button onClick={() => dispatch(deleteBlogs(blog.id))} className="text-red mx-3">Delete</button>
-                <button  className="text-dark-yellow">Edit</button>
+              <button onClick={() => dispatch(publishBlog(blogItem.id))} className="text-green">Publish</button>
+                <button onClick={() => dispatch(deleteBlogs(blogItem.id))} className="text-red mx-3">Delete</button>
+                <button onClick={() => handleEdit(blogItem.id)} className="text-dark-yellow">Edit</button>
               </td>
             </tr>
           ))}
